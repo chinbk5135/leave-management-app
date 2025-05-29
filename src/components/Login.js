@@ -1,22 +1,26 @@
 import React, { useState } from 'react'
 import { supabase } from '../supabase'
-import { TextField, Button, Paper, Typography, Box } from '@mui/material'
+import { TextField, Button, Paper, Typography, Box, Alert } from '@mui/material'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [isSignUp, setIsSignUp] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleAuth = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
 
-    const { error } = isSignUp 
-      ? await supabase.auth.signUp({ email, password })
-      : await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({ 
+      email, 
+      password 
+    })
 
-    if (error) alert(error.message)
+    if (error) {
+      setError(error.message)
+    }
     setLoading(false)
   }
 
@@ -24,10 +28,20 @@ export default function Login() {
     <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
       <Paper elevation={3} sx={{ p: 4, maxWidth: 400, width: '100%' }}>
         <Typography variant="h4" gutterBottom align="center">
-          Leave Tracker
+          Leave Management System
         </Typography>
         
-        <form onSubmit={handleAuth}>
+        <Typography variant="body2" align="center" color="textSecondary" sx={{ mb: 3 }}>
+          Please contact your administrator for account access
+        </Typography>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+        
+        <form onSubmit={handleLogin}>
           <TextField
             fullWidth
             label="Email"
@@ -55,14 +69,7 @@ export default function Login() {
             sx={{ mt: 3, mb: 2 }}
             disabled={loading}
           >
-            {loading ? 'Loading...' : (isSignUp ? 'Sign Up' : 'Sign In')}
-          </Button>
-          
-          <Button
-            fullWidth
-            onClick={() => setIsSignUp(!isSignUp)}
-          >
-            {isSignUp ? 'Already have account? Sign In' : 'Need account? Sign Up'}
+            {loading ? 'Signing In...' : 'Sign In'}
           </Button>
         </form>
       </Paper>
